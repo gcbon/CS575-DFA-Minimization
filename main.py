@@ -9,6 +9,8 @@ import sys
 
 from my_dfa import DFA
 
+#num_states, num_symbols are constant for each problem
+#delta, start, and accepting should have some impact on the problem
 EXAMPLE = DFA(
     num_states=2,
     num_symbols=2,
@@ -18,4 +20,15 @@ EXAMPLE = DFA(
     accepting=set([0]),
     )
 
+#running a character
+print(EXAMPLE.step(0,0))
+
+#running a word
+print(EXAMPLE.run([0,0,1]))
+
+#checking if a word accepts
+print(EXAMPLE.run([0,0,1]))
+
+#print details
 print(EXAMPLE.stats_str())
+print(EXAMPLE.table_str())

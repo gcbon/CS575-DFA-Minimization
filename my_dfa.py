@@ -31,17 +31,20 @@ class DFA:
         final, work = self.run(word)
         return (final in self.accepting), work+2
 
+    #1 work for each add to seen and queue, 1 work for each removal
+    #work ends up being 2*num_reachable + 2*num_reachable*num_symbols
     def find_reachable(self):
         seen = {self.start}
         queue = deque([self.start])
-        work = 2
+        #work = 2
         while queue:
             for t in self.delta[queue.popleft()]:
                 if t not in seen:
                     seen.add(t)
                     queue.append(t)
-                    work += 2
-                work += 1
+                    #work += 2
+                #work += 2
+        work = 2*len(seen)*(self.num_symbols+1)
         return seen, work
 
     def stats_str(self):
