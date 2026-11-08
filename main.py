@@ -83,13 +83,9 @@ def test_construction():
     check("alphabet preserved", EXAMPLE.alphabet == ("0", "1"))
     check("start state is A", EXAMPLE.state_labels[EXAMPLE.start] == "A")
 
-    partial = DFA.from_transitions("ab", "x", {("a", "x"): "b"}, "a", "b")
-    check("missing transitions add a dead state", partial.num_states == 3
-          and partial.state_labels[2] == "_dead")
-    check("dead state loops to itself", partial.delta[2] == [2])
 
     check("complete=False rejects missing transitions", raises(
-        lambda: DFA.from_transitions("ab", "x", {("a", "x"): "b"}, "a", "b", complete=False)))
+        lambda: DFA.from_transitions("ab", "x", {("a", "x"): "b"}, "a", "b")))
     check("unknown target state rejected", raises(
         lambda: DFA.from_transitions("a", "x", {("a", "x"): "z"}, "a", "")))
     check("out-of-range transition rejected", raises(

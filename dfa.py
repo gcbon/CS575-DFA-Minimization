@@ -77,17 +77,13 @@ class DFA:
             raise ValueError("duplicate alphabet symbols")
 
         dead = len(states)
-        need_dead = False
         delta: List[List[int]] = []
         for q in states:
             row = []
             for a in alphabet:
                 target = transitions.get((q, a))
                 if target is None:
-                    if not complete:
-                        raise ValueError(f"missing transition for ({q!r}, {a!r})")
-                    need_dead = True
-                    row.append(dead)
+                    raise ValueError(f"missing transition for ({q!r}, {a!r})")                    
                 else:
                     if target not in idx:
                         raise ValueError(f"unknown target state {target!r}")
@@ -99,9 +95,6 @@ class DFA:
                 raise ValueError(f"transition on unknown state/symbol ({q!r}, {a!r})")
 
         labels: List[Hashable] = list(states)
-        if need_dead:
-            delta.append([dead] * len(alphabet))
-            labels.append("_dead")
 
         return cls(len(labels), alphabet, delta, idx[start],
                    (idx[q] for q in accepting), labels)
