@@ -5,20 +5,21 @@ from collections import deque
 
 
 class DFA:
-    def __init__(self, num_states, alphabet, delta, start, accepting):
+    def __init__(self, num_states, num_symbols, delta, start, accepting):
         self.num_states = num_states
-        self.alphabet = alphabet
-        self.delta = delta #2D array with [state][symbol_id]
+        self.num_symbols = num_symbols
+        self.delta = delta #2D array with [state][symbol]
         self.start = start
         self.accepting = accepting
         self.states = range(num_states) #each state is just a number
-        self._symbol_index = {s: i for i, s in enumerate(self.alphabet)} #assign a number to each letter
+        self.alphabet = range(num_symbols) #each symbol is just a number
 
-    #We consider accessing values to take 0 work, since there is no arithmetic or asssignment
+    #We consider accessing values to take 0 work, since there is no arithmetic or assignment
     def step(self, q, symbol):
-        return self.delta[q][self._symbol_index[symbol]]
+        return self.delta[q][symbol]
 
     #Sum of assignments done in each loop. This is length of string. Subtract 1 because the last assignment isn't used.
+    #word is just an arrays of numbers
     def run(self, word, q=None):
         q = self.start if q is None else q
         for s in word:
@@ -43,11 +44,11 @@ class DFA:
                 work += 1
         return seen, work
 
-    def print_stats(self):
-        return (f"DFA(num_states={self.num_states}, alphabet={self.alphabet!r}, "
+    def stats_str(self):
+        return (f"DFA(num_states={self.num_states}, num_symbols={self.num_symbols!r}, "
                 f"start={self.start}, accepting={sorted(self.accepting)})")
 
-    def print_table(self):
+    def table_str(self):
         names = [str(l) for l in self.states]
         w = max([len(n) for n in names] + [len(str(s)) for s in self.alphabet] + [5])
         header = "    " + "state".ljust(w) + " | " + " ".join(str(s).ljust(w) for s in self.alphabet)
