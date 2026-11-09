@@ -8,6 +8,7 @@ import random
 import sys
 
 from my_dfa import DFA
+import work_functions
 
 #num_states, num_symbols are constant for each problem
 #delta, start, and accepting should have some impact on the problem
@@ -32,3 +33,9 @@ print(EXAMPLE.run([0,0,1]))
 #print details
 print(EXAMPLE.stats_str())
 print(EXAMPLE.table_str())
+
+print(EXAMPLE.find_reachable())
+
+#usage of work_functions
+#work_functions return the amount of work required rather than the usual output
+print(work_functions.find_reachable_work(EXAMPLE))

@@ -24,28 +24,22 @@ class DFA:
         q = self.start if q is None else q
         for s in word:
             q = self.step(q, s)
-        return q, len(word)-1
+        return q
 
     #work done to run the DFA, followed by the assignment and containment check
     def accepts(self, word):
-        final, work = self.run(word)
-        return (final in self.accepting), work+2
+        final = self.run(word)
+        return (final in self.accepting)
 
-    #1 work for each add to seen and queue, 1 work for each removal
-    #work ends up being 2*num_reachable + 2*num_reachable*num_symbols
     def find_reachable(self):
         seen = {self.start}
         queue = deque([self.start])
-        #work = 2
         while queue:
             for t in self.delta[queue.popleft()]:
                 if t not in seen:
                     seen.add(t)
                     queue.append(t)
-                    #work += 2
-                #work += 2
-        work = 2*len(seen)*(self.num_symbols+1)
-        return seen, work
+        return seen
 
     def stats_str(self):
         return (f"DFA(num_states={self.num_states}, num_symbols={self.num_symbols!r}, "
