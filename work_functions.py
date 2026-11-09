@@ -76,10 +76,10 @@ def remove_unreachable(input_DFA):
     #second, rename all states
     new_delta = [[new_state_numbers[i] for i in row] for row in new_delta]
     new_DFA = DFA(
-        new_num_states,
-        new_num_symbols,
-        new_delta,
-        new_start,
-        new_accepting
+        num_states = new_num_states,
+        num_symbols = new_num_symbols,
+        delta = new_delta,
+        start = new_start,
+        accepting= new_accepting
     )
     return new_DFA

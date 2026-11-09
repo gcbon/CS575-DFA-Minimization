@@ -5,14 +5,14 @@ from collections import deque
 
 
 class DFA:
-    def __init__(self, num_states, num_symbols, delta, start, accepting):
-        self.num_states = num_states
-        self.num_symbols = num_symbols
+    def __init__(self, delta, start, accepting, num_states=None, num_symbols=None):
+        self.num_states = num_states if num_states is not None else len(delta)
+        self.num_symbols = num_symbols if num_symbols is not None else len(delta[0])
         self.delta = delta #2D array with [state][symbol]
         self.start = start
         self.accepting = accepting
-        self.states = range(num_states) #each state is just a number
-        self.alphabet = range(num_symbols) #each symbol is just a number
+        self.states = range(self.num_states) #each state is just a number
+        self.alphabet = range(self.num_symbols) #each symbol is just a number
 
     #We consider accessing values to take 0 work, since there is no arithmetic or assignment
     def step(self, q, symbol):

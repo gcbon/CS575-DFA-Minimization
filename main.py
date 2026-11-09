@@ -15,6 +15,14 @@ EXAMPLE = DFA(
     accepting=set([0]),
     )
 
+#num_states and num_symbols can be inferred from delta (less error-prone)
+EXAMPLE = DFA(
+    delta=[[0,1],
+           [1,1]],
+    start=0,
+    accepting=set([0]),
+    )
+
 #running a character
 print("running DFA with character 0: ", EXAMPLE.step(0,0))
 
