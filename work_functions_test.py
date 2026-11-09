@@ -8,7 +8,7 @@ deltafunc = [[0,1,2],
 EXAMPLE = DFA(
     delta=deltafunc,
     start=0,
-    accepting=set([0,2]),
+    accepting=set([0]),
     )
 
 #running a character
@@ -34,4 +34,5 @@ print("work to find reachable states: ", work_functions.find_reachable_work(EXAM
 #print(work_functions.remove_unreachable(EXAMPLE).table_str())
 #print(work_functions.work)
 
-print(work_functions.table_filling(EXAMPLE))
+print(work_functions.myhill_nerode(EXAMPLE).table_str())
+print(work_functions.myhill_nerode_work(EXAMPLE))

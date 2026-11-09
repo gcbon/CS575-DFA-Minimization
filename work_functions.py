@@ -83,6 +83,7 @@ def remove_unreachable(input_DFA):
     return new_DFA
 
 def table_filling(input_DFA):
+    global work
     num_states = input_DFA.num_states
     num_symbols = input_DFA.num_symbols
     accepting = input_DFA.accepting
@@ -133,3 +134,93 @@ def table_filling(input_DFA):
         work += 1 #check
     work += 1 #loop end
     return distinguish
+
+
+#Myhill-Nerode minimization: remove unreachable states, then merge indistinguishable states
+#work is not counted here yet (other than inside the helper functions)
+def myhill_nerode(input_DFA):
+    global work
+    reachable_DFA = remove_unreachable(input_DFA)
+    distinguish = table_filling(reachable_DFA)
+    num_states = reachable_DFA.num_states
+
+    #map each state to the smallest state equivalent to it (equivalence is transitive, so this is well defined)
+    representative = list(range(num_states))
+    for p in range(num_states):
+        work += 1 #loop
+        for q in range(p):
+            work += 1 #loop
+            if not distinguish[p][q]:
+                representative[p] = representative[q]
+                work += 1 #assignment
+                break
+            work += 1 #check
+        work += 1 #loop end
+    work += 1 #loop end
+    #we will consider this to be the end of creating the equivalence class
+    #all remaining work on that front will not be counted
+
+    #number the equivalence classes 0..k-1
+    new_state_numbers = [-1 for _ in range(num_states)]
+    new_index = 0
+    for p in range(num_states):
+        if representative[p] == p:
+            new_state_numbers[p] = new_index
+            new_index += 1
+    new_state_numbers = [new_state_numbers[representative[p]] for p in range(num_states)]
+
+    #build the minimized DFA using each class's representative row
+    new_delta = [[new_state_numbers[t] for t in reachable_DFA.delta[p]]
+                 for p in range(num_states) if representative[p] == p]
+    work += 2*len(reachable_DFA.delta) - len(new_delta) + 1 #1 work for each loop iteration, 1 work for each removal
+    #renaming states doesn't count since that's only representational
+    new_state_numbers[q]
+    
+    new_start = new_state_numbers[reachable_DFA.start]
+    work += 1
+    new_accepting = sorted({new_state_numbers[q] for q in reachable_DFA.accepting})
+    work += len(reachable_DFA.delta) + 1 #1 work for each loop over the new states
+    return DFA(
+        delta = new_delta,
+        start = new_start,
+        accepting = new_accepting
+    )
+
+def myhill_nerode_no_return(input_DFA):
+    global work
+    reachable_DFA = remove_unreachable(input_DFA)
+    distinguish = table_filling(reachable_DFA)
+    num_states = reachable_DFA.num_states
+
+    #map each state to the smallest state equivalent to it (equivalence is transitive, so this is well defined)
+    representative = list(range(num_states))
+    for p in range(num_states):
+        work += 1 #loop
+        for q in range(p):
+            work += 1 #loop
+            if not distinguish[p][q]:
+                representative[p] = representative[q]
+                work += 1 #assignment
+                break
+            work += 1 #check
+        work += 1 #loop end
+    work += 1 #loop end
+    #we will consider this to be the end of creating the equivalence class
+    #all remaining work on that front will not be counted
+
+    #number the equivalence classes 0..k-1
+    new_index = 0
+    for p in range(num_states):
+        if representative[p] == p:
+            new_index += 1
+    
+    work += 2*len(reachable_DFA.delta) - new_index + 1 #1 work for each loop iteration, 1 work for each removal    
+    work += 1
+    work += len(reachable_DFA.delta) + 1 #1 work for each loop over the new states
+
+def myhill_nerode_work(input_DFA):
+    global work
+    reset_work()
+    myhill_nerode_no_return(input_DFA)
+    return work
+
