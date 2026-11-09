@@ -1,9 +1,9 @@
 from my_dfa import DFA
 import work_functions
 
-deltafunc = [[0,2,0],
-             [0,2,2],
-             [0,2,2]]
+deltafunc = [[0,1,2],
+             [0,1,1],
+             [0,1,1]]
 
 EXAMPLE = DFA(
     delta=deltafunc,
@@ -31,5 +31,7 @@ print("work to find reachable states: ", work_functions.find_reachable_work(EXAM
 
 
 #Note: anything after this isn't relevant to your work
-print(work_functions.remove_unreachable(EXAMPLE).table_str())
-print(work_functions.work)
+#print(work_functions.remove_unreachable(EXAMPLE).table_str())
+#print(work_functions.work)
+
+print(work_functions.table_filling(EXAMPLE))
