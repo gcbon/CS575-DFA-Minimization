@@ -1,9 +1,3 @@
-"""Verify that the DFA class in dfa.py behaves correctly.
-
-Run with:  python main.py
-Exits with status 1 if any check fails.
-"""
-
 import random
 import sys
 
@@ -22,20 +16,20 @@ EXAMPLE = DFA(
     )
 
 #running a character
-print(EXAMPLE.step(0,0))
+print("running DFA with character 0: ", EXAMPLE.step(0,0))
 
 #running a word
-print(EXAMPLE.run([0,0,1]))
+print("running DFA with word 001: ", EXAMPLE.run([0,0,1]))
 
 #checking if a word accepts
-print(EXAMPLE.run([0,0,1]))
+print("checking for acceptance with word 001: ", EXAMPLE.accepts([0,0,1]))
 
 #print details
 print(EXAMPLE.stats_str())
 print(EXAMPLE.table_str())
 
-print(EXAMPLE.find_reachable())
+print("reachable states: ", EXAMPLE.find_reachable())
 
 #usage of work_functions
 #work_functions return the amount of work required rather than the usual output
-print(work_functions.find_reachable_work(EXAMPLE))
+print("work to find reachable states: ", work_functions.find_reachable_work(EXAMPLE))

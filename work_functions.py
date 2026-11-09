@@ -14,7 +14,7 @@ def step(DFA, q, symbol):
 
 def run(DFA, word, q=None):
     global work
-    work += len(word)-1 #1 work for each assignment after the optional one, minus last assignment to prevent double counting
+    work += 2*len(word)-1 #1 work for each assignment after the optional one and loop, minus last assignment to prevent double counting
     return DFA.run(word,q)
 
 
@@ -25,7 +25,6 @@ def accept(DFA, word):
     return (final in DFA.accepting)
 
 #1 work for each add to seen and queue, 1 work for each removal
-#You do 3 work for each item added to the queue and 2 work for every unique item added    
 def find_reachable(DFA):
     global work
     seen = {DFA.start}
@@ -49,3 +48,38 @@ def find_reachable_work(DFA):
     reset_work()
     find_reachable(DFA)
     return work
+
+#here, the count of work assumes everything is done in-place, as that is the mathematically fastest way to do it
+def remove_unreachable(input_DFA):
+    global work
+    reachable = find_reachable(input_DFA)
+    new_num_symbols = input_DFA.num_symbols
+    new_num_states = len(reachable)
+    work += 3*input_DFA.num_states - new_num_states #1 work for each state removed, 1 work to check, 1 work for loop overhead
+    
+    #input: old state number, output: new state number
+    new_state_numbers = [-1 for i in range(input_DFA.num_states)]
+    new_index = 0
+    for old_index in reachable:
+        new_state_numbers[old_index]=new_index
+        new_index += 1
+    #no work required since the mathematical definition doesn't need this step
+
+    new_start = new_state_numbers[input_DFA.start]
+    new_accepting = [new_state_numbers[i] for i in input_DFA.accepting if new_state_numbers[i]!=-1]
+    work += 3*len(input_DFA.accepting) - len(new_accepting) #1 work for loop overhead, 1 work to check each item, 1 work to remove the items not present
+    
+
+    #first, remove unreachable rows
+    new_delta = [row for i, row in enumerate(input_DFA.delta) if new_state_numbers[i]!=-1]
+    work += 3*input_DFA.num_states - new_num_states #same justification as before
+    #second, rename all states
+    new_delta = [[new_state_numbers[i] for i in row] for row in new_delta]
+    new_DFA = DFA(
+        new_num_states,
+        new_num_symbols,
+        new_delta,
+        new_start,
+        new_accepting
+    )
+    return new_DFA
