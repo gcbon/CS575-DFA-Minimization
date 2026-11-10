@@ -91,6 +91,7 @@ def find_best_dfa(
     generations: int = 200,
     mutation_rate: float = 0.05,
     seed: Optional[int] = None,
+    report_progress: bool = False,
 ) -> Tuple[DFA, int]:
     """Return the highest-scoring DFA found by the genetic search."""
     if num_states < 1:
@@ -111,15 +112,22 @@ def find_best_dfa(
     ]
     best_candidate = population[0]
     best_score: Optional[int] = None
+    best_found_at = 0
+    tries = 0
+    seen_candidates = set()
 
     for generation in range(generations + 1):
-        scored_population = [
-            (candidate, _score(candidate, num_states, num_symbols))
-            for candidate in population
-        ]
+        scored_population = []
+        for candidate in population:
+            score = _score(candidate, num_states, num_symbols)
+            tries += 1
+            seen_candidates.add(candidate)
+            scored_population.append((candidate, score))
+            if best_score is None or score > best_score:
+                best_candidate, best_score = candidate, score
+                best_found_at = tries
+
         generation_best = max(scored_population, key=lambda entry: entry[1])
-        if best_score is None or generation_best[1] > best_score:
-            best_candidate, best_score = generation_best
 
         if generation == generations:
             break
@@ -135,6 +143,10 @@ def find_best_dfa(
 
     if best_score is None:
         raise RuntimeError("the genetic search did not evaluate any candidates")
+    if report_progress:
+        print("Unique DFA candidates tried:", len(seen_candidates))
+        print("Total tries:", tries)
+        print("Tries to find best work:", best_found_at)
     return _to_dfa(best_candidate, num_states, num_symbols), best_score
 
 
@@ -146,6 +158,7 @@ def main() -> None:
         generations=200,
         mutation_rate=0.05,
         seed=None,
+        report_progress=True,
     )
     print("Best work:", score)
     print("Start state:", best_dfa.start)

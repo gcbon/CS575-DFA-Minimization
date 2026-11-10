@@ -40,6 +40,7 @@ def find_best_dfa(
     num_states: int = 5,
     num_symbols: int = 2,
     max_candidates: Optional[int] = None,
+    report_progress: bool = False,
 ) -> Tuple[DFA, int]:
     """Return the best DFA in the enumerated candidate space."""
     if num_states < 1:
@@ -52,6 +53,7 @@ def find_best_dfa(
     best_candidate = None
     best_score = None
     candidates_checked = 0
+    best_found_at = 0
     for candidate in _all_candidates(num_states, num_symbols):
         if max_candidates is not None and candidates_checked >= max_candidates:
             break
@@ -60,9 +62,14 @@ def find_best_dfa(
         if best_score is None or score > best_score:
             best_candidate = candidate
             best_score = score
+            best_found_at = candidates_checked
 
     if best_candidate is None or best_score is None:
         raise RuntimeError("the search did not evaluate any candidates")
+    if report_progress:
+        print("Unique DFA candidates tried:", candidates_checked)
+        print("Total tries:", candidates_checked)
+        print("Tries to find best work:", best_found_at)
     return _to_dfa(best_candidate, num_states, num_symbols), best_score
 
 
@@ -71,6 +78,7 @@ def main() -> None:
         num_states=4,
         num_symbols=2,
         max_candidates=None,
+        report_progress=True,
     )
     print("Best work:", score)
     print("Start state:", best_dfa.start)
