@@ -34,5 +34,4 @@ print("work to find reachable states: ", work_functions.find_reachable_work(EXAM
 #print(work_functions.remove_unreachable(EXAMPLE).table_str())
 #print(work_functions.work)
 
-print(work_functions.myhill_nerode(EXAMPLE).table_str())
-print(work_functions.myhill_nerode_work(EXAMPLE))
+print(work_functions.brzozowski(EXAMPLE).table_str())

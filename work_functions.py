@@ -174,7 +174,6 @@ def myhill_nerode(input_DFA):
                  for p in range(num_states) if representative[p] == p]
     work += 2*len(reachable_DFA.delta) - len(new_delta) + 1 #1 work for each loop iteration, 1 work for each removal
     #renaming states doesn't count since that's only representational
-    new_state_numbers[q]
     
     new_start = new_state_numbers[reachable_DFA.start]
     work += 1
@@ -186,41 +185,64 @@ def myhill_nerode(input_DFA):
         accepting = new_accepting
     )
 
-def myhill_nerode_no_return(input_DFA):
-    global work
-    reachable_DFA = remove_unreachable(input_DFA)
-    distinguish = table_filling(reachable_DFA)
-    num_states = reachable_DFA.num_states
-
-    #map each state to the smallest state equivalent to it (equivalence is transitive, so this is well defined)
-    representative = list(range(num_states))
-    for p in range(num_states):
-        work += 1 #loop
-        for q in range(p):
-            work += 1 #loop
-            if not distinguish[p][q]:
-                representative[p] = representative[q]
-                work += 1 #assignment
-                break
-            work += 1 #check
-        work += 1 #loop end
-    work += 1 #loop end
-    #we will consider this to be the end of creating the equivalence class
-    #all remaining work on that front will not be counted
-
-    #number the equivalence classes 0..k-1
-    new_index = 0
-    for p in range(num_states):
-        if representative[p] == p:
-            new_index += 1
-    
-    work += 2*len(reachable_DFA.delta) - new_index + 1 #1 work for each loop iteration, 1 work for each removal    
-    work += 1
-    work += len(reachable_DFA.delta) + 1 #1 work for each loop over the new states
 
 def myhill_nerode_work(input_DFA):
     global work
     reset_work()
-    myhill_nerode_no_return(input_DFA)
+    myhill_nerode(input_DFA)
     return work
 
+
+
+#reverse a DFA into an NFA: every edge flipped, accepting states become start states, start becomes accepting
+#returns (nfa_delta, starts, accepting) where nfa_delta[state][symbol] is a set of states
+def reverse_dfa(input_DFA):
+    global work
+    nfa_delta = [[set() for _ in range(input_DFA.num_symbols)] for _ in range(input_DFA.num_states)]
+    for q in range(input_DFA.num_states):
+        for s in range(input_DFA.num_symbols):
+            nfa_delta[input_DFA.delta[q][s]][s].add(q)
+            work += 2
+        work+=2
+    return nfa_delta, set(input_DFA.accepting), {input_DFA.start}
+
+#subset construction, only building subsets reachable from the start set
+def determinize(nfa_delta, starts, accepting, num_symbols):
+    global work
+    start_set = frozenset(starts)
+    subset_numbers = {start_set: 0}
+    subsets = [start_set]
+    new_delta = []
+    queue = deque([start_set])
+    while queue:
+        work+=1 #loop
+        current = queue.popleft()
+        work += 1 #assignment used several times
+        row = []
+        for s in range(num_symbols):
+            work += 1 #loop
+            target = frozenset(t for q in current for t in nfa_delta[q][s])
+            #not sure how much work this should count for
+            if target not in subset_numbers:
+                subset_numbers[target] = len(subsets)
+                subsets.append(target)
+                queue.append(target)
+                work+=3
+            work += 1 #containment check
+            row.append(subset_numbers[target])
+            work += 1
+        work += 1 #loop end
+        new_delta.append(row)
+        work += 1
+    work+=1 #loop end
+    new_accepting = [i for i, subset in enumerate(subsets) if subset & accepting]
+    return DFA(
+        delta = new_delta,
+        start = 0,
+        accepting = new_accepting
+    )
+
+#Brzozowski's algorithm: determinize(reverse(determinize(reverse(DFA))))
+def brzozowski(input_DFA):
+    reversed_DFA = determinize(*reverse_dfa(input_DFA), input_DFA.num_symbols)
+    return determinize(*reverse_dfa(reversed_DFA), input_DFA.num_symbols)
