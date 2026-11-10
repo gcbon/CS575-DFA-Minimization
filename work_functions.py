@@ -270,3 +270,9 @@ def determinize(nfa_delta, starts, accepting, num_symbols):
 def brzozowski(input_DFA):
     reversed_DFA = determinize(*reverse_dfa(input_DFA), input_DFA.num_symbols)
     return determinize(*reverse_dfa(reversed_DFA), input_DFA.num_symbols)
+
+def brzozowski_work(input_DFA):
+    global work
+    reset_work()
+    brzozowski(input_DFA)
+    return work
