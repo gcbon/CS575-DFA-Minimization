@@ -40,7 +40,7 @@ def find_reachable(DFA):
                 #runs for every reachable state
                 seen.add(t) #1 work per reachable state
                 queue.append(t) #1 work per reachable state
-    work += 2*len(seen)*(DFA.num_symbols+1) + 4*len(seen) + 1
+    work += 2*len(seen)*(DFA.num_symbols) + 5*len(seen) + 1
     return seen
 
 def find_reachable_work(DFA):
@@ -109,7 +109,7 @@ def table_filling(input_DFA):
                 if first < second:
                     dependents[second][first].append((p,q))
                     work += 1 #append
-                work += 1 #check
+                work += 1 #check for not equal. size check not needed in unordered pair definition
             work += 1 #loop end
             #set distinguish true if p and q have different accept values
             if (p in accepting) != (q in accepting):
@@ -172,13 +172,13 @@ def myhill_nerode(input_DFA):
     #build the minimized DFA using each class's representative row
     new_delta = [[new_state_numbers[t] for t in reachable_DFA.delta[p]]
                  for p in range(num_states) if representative[p] == p]
-    work += 2*len(reachable_DFA.delta) - len(new_delta) + 1 #1 work for each loop iteration, 1 work for each removal
+    work += 4*len(reachable_DFA.delta) - len(new_delta) + len(reachable_DFA.delta)*len(reachable_DFA.delta[0]) + 1 #1 work for each loop iteration, 1 work for each removal, 1 work for each check, num_symbols+1 work for each kept
     #renaming states doesn't count since that's only representational
     
     new_start = new_state_numbers[reachable_DFA.start]
     work += 1
     new_accepting = sorted({new_state_numbers[q] for q in reachable_DFA.accepting})
-    work += len(reachable_DFA.delta) + 1 #1 work for each loop over the new states
+    work += len(reachable_DFA.delta) + 1 #actual algorithm loops over all states and selects the accepting
     return DFA(
         delta = new_delta,
         start = new_start,
@@ -204,6 +204,7 @@ def reverse_dfa(input_DFA):
             nfa_delta[input_DFA.delta[q][s]][s].add(q)
             work += 2
         work+=2
+    work += 1
     return nfa_delta, set(input_DFA.accepting), {input_DFA.start}
 
 #subset construction, only building subsets reachable from the start set
@@ -214,15 +215,24 @@ def determinize(nfa_delta, starts, accepting, num_symbols):
     subsets = [start_set]
     new_delta = []
     queue = deque([start_set])
+    work +=3
     while queue:
         work+=1 #loop
         current = queue.popleft()
-        work += 1 #assignment used several times
+        work += 1 #removal from queue
         row = []
         for s in range(num_symbols):
             work += 1 #loop
-            target = frozenset(t for q in current for t in nfa_delta[q][s])
-            #not sure how much work this should count for
+            #target = union of nfa_delta[q][s] over every q in current
+            target = set()
+            for q in current:
+                work += 1 #loop
+                for t in nfa_delta[q][s]:
+                    target.add(t)
+                    work += 2 #loop and insertion
+                work += 1 #loop end
+            work += 1 #loop end
+            target = frozenset(target) #representational only, no work
             if target not in subset_numbers:
                 subset_numbers[target] = len(subsets)
                 subsets.append(target)
@@ -235,7 +245,21 @@ def determinize(nfa_delta, starts, accepting, num_symbols):
         new_delta.append(row)
         work += 1
     work+=1 #loop end
-    new_accepting = [i for i, subset in enumerate(subsets) if subset & accepting]
+    #a subset is accepting iff it contains any accepting NFA state
+    #in Brzozowski's algorithm, accepting is always a single state, so this is 1 check per subset
+    new_accepting = []
+    for i, subset in enumerate(subsets):
+        work += 1 #loop
+        for f in accepting:
+            work += 1 #loop
+            work += 1 #containment check
+            if f in subset:
+                new_accepting.append(i)
+                work += 1 #insertion
+                break
+        else:
+            work += 1 #loop end (only reached when no break)
+    work += 1 #loop end
     return DFA(
         delta = new_delta,
         start = 0,
