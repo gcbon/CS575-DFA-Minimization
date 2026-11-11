@@ -73,6 +73,7 @@ def find_best_dfa(
         if best_score is None or score > best_score:
             best_candidate = candidate
             best_score = score
+            best_found_at = tries
 
     if best_candidate is None or best_score is None:
         raise RuntimeError("the random search did not evaluate any candidates")
@@ -85,9 +86,9 @@ def find_best_dfa(
 
 def main() -> None:
     best_dfa, score, scores, best_scores = find_best_dfa(
-        num_states=100,
+        num_states=10,
         num_symbols=2,
-        guesses=500,
+        guesses=50,
         seed=None,
         report_progress=True,
     )

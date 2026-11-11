@@ -1,5 +1,7 @@
 from itertools import product
-from typing import Iterator, Optional, Tuple
+from typing import Iterator, List, Optional, Tuple
+
+import matplotlib.pyplot as plt
 
 from my_dfa import DFA
 import work_functions
@@ -41,7 +43,7 @@ def find_best_dfa(
     num_symbols: int = 2,
     max_candidates: Optional[int] = None,
     report_progress: bool = False,
-) -> Tuple[DFA, int]:
+) -> Tuple[DFA, int, List[int], List[int]]:
     """Return the best DFA in the enumerated candidate space."""
     if num_states < 1:
         raise ValueError("num_states must be at least 1")
@@ -54,6 +56,8 @@ def find_best_dfa(
     best_score = None
     candidates_checked = 0
     best_found_at = 0
+    scores = []
+    best_scores = []
     for candidate in _all_candidates(num_states, num_symbols):
         if max_candidates is not None and candidates_checked >= max_candidates:
             break
@@ -63,6 +67,8 @@ def find_best_dfa(
             best_candidate = candidate
             best_score = score
             best_found_at = candidates_checked
+        scores.append(score)
+        best_scores.append(best_score)
 
     if best_candidate is None or best_score is None:
         raise RuntimeError("the search did not evaluate any candidates")
@@ -70,12 +76,17 @@ def find_best_dfa(
         print("Unique DFA candidates tried:", candidates_checked)
         print("Total tries:", candidates_checked)
         print("Tries to find best work:", best_found_at)
-    return _to_dfa(best_candidate, num_states, num_symbols), best_score
+    return (
+        _to_dfa(best_candidate, num_states, num_symbols),
+        best_score,
+        scores,
+        best_scores,
+    )
 
 
 def main() -> None:
-    best_dfa, score = find_best_dfa(
-        num_states=4,
+    best_dfa, score, scores, best_scores = find_best_dfa(
+        num_states=10,
         num_symbols=2,
         max_candidates=None,
         report_progress=True,
@@ -84,6 +95,13 @@ def main() -> None:
     print("Start state:", best_dfa.start)
     print("Accepting states:", sorted(best_dfa.accepting))
     print("Transitions:", best_dfa.delta)
+
+    plt.scatter(range(len(best_scores)), best_scores, s=2)
+    plt.scatter(range(len(scores)), scores, s=2)
+    plt.xlabel("DFAs Checked")
+    plt.ylabel("Score")
+    plt.title("Score and Max Score over Time")
+    plt.show()
 
 
 if __name__ == "__main__":
