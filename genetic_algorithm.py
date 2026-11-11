@@ -14,7 +14,9 @@ class Algorithm(Enum):
     MYHILL_NERODE = "myhill_nerode_work"
 
 
-ALGORITHM = Algorithm.FIND_REACHABLE
+#ALGORITHM = Algorithm.FIND_REACHABLE
+# ALGORITHM = Algorithm.MYHILL_NERODE
+ALGORITHM = Algorithm.BRZOZOWSKI
 
 Candidate = Tuple[Tuple[int, ...], int, Tuple[bool, ...]]
 
@@ -178,10 +180,10 @@ def find_best_dfa(
 
 def main() -> None:
     best_dfa, score, scores, best_scores = find_best_dfa(
-        num_states=4,
+        num_states=10,
         num_symbols=2,
-        population_size=5,
-        generations=10,
+        population_size=16,
+        generations=30,
         mutation_rate=0.05,
         seed=None,
         report_progress=True,

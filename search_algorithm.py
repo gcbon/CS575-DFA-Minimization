@@ -14,9 +14,11 @@ class Algorithm(Enum):
     MYHILL_NERODE = "myhill_nerode_work"
 
 
-ALGORITHM = Algorithm.FIND_REACHABLE
-    #ALGORITHM = Algorithm.MYHILL_NERODE
-    #ALGORITHM = Algorithm.BRZOZOWSKI
+#ALGORITHM = Algorithm.FIND_REACHABLE
+# ALGORITHM = Algorithm.MYHILL_NERODE
+ALGORITHM = Algorithm.BRZOZOWSKI
+
+MAX_TRIES = 500
 
 
 Candidate = Tuple[Tuple[int, ...], int, Tuple[bool, ...]]
@@ -78,6 +80,8 @@ def find_best_dfa(
     for candidate in _all_candidates(num_states, num_symbols):
         if max_candidates is not None and candidates_checked >= max_candidates:
             break
+        if MAX_TRIES is not None and candidates_checked >= MAX_TRIES:
+            break
         score = _score(candidate, num_states, num_symbols)
         candidates_checked += 1
         if best_score is None or score > best_score:
@@ -103,7 +107,7 @@ def find_best_dfa(
 
 def main() -> None:
     best_dfa, score, scores, best_scores = find_best_dfa(
-        num_states=4,
+        num_states=10,
         num_symbols=2,
         max_candidates=None,
         report_progress=True,

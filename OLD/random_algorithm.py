@@ -5,8 +5,6 @@ from typing import Optional, Tuple
 from my_dfa import DFA
 import work_functions
 
-import matplotlib.pyplot as plt
-
 
 class Algorithm(Enum):
     FIND_REACHABLE = "find_reachable_work"
@@ -76,15 +74,10 @@ def find_best_dfa(
     best_score = None
     best_found_at = 0
     seen_candidates = set()
-    scores = []
-    best_scores = []
-    
     for tries in range(1, guesses + 1):
         candidate = _random_candidate(num_states, num_symbols, rng)
         seen_candidates.add(candidate)
         score = _score(candidate, num_states, num_symbols)
-        scores.append(score)
-        best_scores.append(best_score)
         if best_score is None or score > best_score:
             best_candidate = candidate
             best_score = score
@@ -96,14 +89,14 @@ def find_best_dfa(
         print("Unique DFA candidates tried:", len(seen_candidates))
         print("Total tries:", guesses)
         print("Tries to find best work:", best_found_at)
-    return _to_dfa(best_candidate, num_states, num_symbols), best_score, scores, best_scores
+    return _to_dfa(best_candidate, num_states, num_symbols), best_score
 
 
 def main() -> None:
-    best_dfa, score, scores, best_scores = find_best_dfa(
-        num_states=10,
+    best_dfa, score = find_best_dfa(
+        num_states=100,
         num_symbols=2,
-        guesses=50,
+        guesses=10000,
         seed=None,
         report_progress=True,
     )
@@ -111,13 +104,6 @@ def main() -> None:
     print("Start state:", best_dfa.start)
     print("Accepting states:", sorted(best_dfa.accepting))
     print("Transitions:", best_dfa.delta)
-
-    plt.scatter(range(len(best_scores)), best_scores, s=2)
-    plt.scatter(range(len(scores)), scores, s=2)
-    plt.xlabel("DFAs Checked")
-    plt.ylabel("Score")
-    plt.title("Score and Max Score over Time")
-    plt.show()
 
 
 if __name__ == "__main__":
