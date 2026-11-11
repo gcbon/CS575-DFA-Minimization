@@ -1,10 +1,20 @@
 import random
+from enum import Enum
 from typing import Optional, Tuple
 
 from my_dfa import DFA
 import work_functions
 
 import matplotlib.pyplot as plt
+
+
+class Algorithm(Enum):
+    FIND_REACHABLE = "find_reachable_work"
+    BRZOZOWSKI = "brzozowski_work"
+    MYHILL_NERODE = "myhill_nerode_work"
+
+
+ALGORITHM = Algorithm.FIND_REACHABLE
 
 Candidate = Tuple[Tuple[int, ...], int, Tuple[bool, ...]]
 
@@ -36,9 +46,14 @@ def _to_dfa(candidate: Candidate, num_states: int, num_symbols: int) -> DFA:
 
 
 def _score(candidate: Candidate, num_states: int, num_symbols: int) -> int:
-    return work_functions.find_reachable_work(
-        _to_dfa(candidate, num_states, num_symbols)
-    )
+    dfa = _to_dfa(candidate, num_states, num_symbols)
+    if ALGORITHM == Algorithm.FIND_REACHABLE:
+        return work_functions.find_reachable_work(dfa)
+    if ALGORITHM == Algorithm.BRZOZOWSKI:
+        return work_functions.brzozowski_work(dfa)
+    if ALGORITHM == Algorithm.MYHILL_NERODE:
+        return work_functions.myhill_nerode_work(dfa)
+    raise ValueError(f"Unsupported algorithm: {ALGORITHM}")
 
 
 def find_best_dfa(

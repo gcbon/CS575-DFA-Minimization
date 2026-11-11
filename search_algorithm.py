@@ -1,3 +1,4 @@
+from enum import Enum
 from itertools import product
 from typing import Iterator, List, Optional, Tuple
 
@@ -5,6 +6,17 @@ import matplotlib.pyplot as plt
 
 from my_dfa import DFA
 import work_functions
+
+
+class Algorithm(Enum):
+    FIND_REACHABLE = "find_reachable_work"
+    BRZOZOWSKI = "brzozowski_work"
+    MYHILL_NERODE = "myhill_nerode_work"
+
+
+ALGORITHM = Algorithm.FIND_REACHABLE
+    #ALGORITHM = Algorithm.MYHILL_NERODE
+    #ALGORITHM = Algorithm.BRZOZOWSKI
 
 
 Candidate = Tuple[Tuple[int, ...], int, Tuple[bool, ...]]
@@ -33,9 +45,14 @@ def _to_dfa(candidate: Candidate, num_states: int, num_symbols: int) -> DFA:
 
 
 def _score(candidate: Candidate, num_states: int, num_symbols: int) -> int:
-    return work_functions.find_reachable_work(
-        _to_dfa(candidate, num_states, num_symbols)
-    )
+    dfa = _to_dfa(candidate, num_states, num_symbols)
+    if ALGORITHM == Algorithm.FIND_REACHABLE:
+        return work_functions.find_reachable_work(dfa)
+    if ALGORITHM == Algorithm.BRZOZOWSKI:
+        return work_functions.brzozowski_work(dfa)
+    if ALGORITHM == Algorithm.MYHILL_NERODE:
+        return work_functions.myhill_nerode_work(dfa)
+    raise ValueError(f"Unsupported algorithm: {ALGORITHM}")
 
 
 def find_best_dfa(
@@ -86,11 +103,12 @@ def find_best_dfa(
 
 def main() -> None:
     best_dfa, score, scores, best_scores = find_best_dfa(
-        num_states=10,
+        num_states=4,
         num_symbols=2,
         max_candidates=None,
         report_progress=True,
     )
+
     print("Best work:", score)
     print("Start state:", best_dfa.start)
     print("Accepting states:", sorted(best_dfa.accepting))
