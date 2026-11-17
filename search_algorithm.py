@@ -18,7 +18,6 @@ class Algorithm(Enum):
 # ALGORITHM = Algorithm.MYHILL_NERODE
 ALGORITHM = Algorithm.BRZOZOWSKI
 
-MAX_TRIES = 500
 
 
 Candidate = Tuple[Tuple[int, ...], int, Tuple[bool, ...]]
@@ -79,8 +78,6 @@ def find_best_dfa(
     best_scores = []
     for candidate in _all_candidates(num_states, num_symbols):
         if max_candidates is not None and candidates_checked >= max_candidates:
-            break
-        if MAX_TRIES is not None and candidates_checked >= MAX_TRIES:
             break
         score = _score(candidate, num_states, num_symbols)
         candidates_checked += 1
