@@ -27,9 +27,8 @@ def _all_candidates(num_states: int, num_symbols: int) -> Iterator[Candidate]:
     for transitions in product(
         range(num_states), repeat=num_states * num_symbols
     ):
-        for start_state in range(num_states):
-            for accepting in product((False, True), repeat=num_states):
-                yield transitions, start_state, accepting
+        for accepting in product((False, True), repeat=num_states):
+            yield transitions, 0, accepting
 
 
 def _to_dfa(candidate: Candidate, num_states: int, num_symbols: int) -> DFA:
